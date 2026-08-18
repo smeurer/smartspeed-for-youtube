@@ -18,6 +18,8 @@ Stores custom video playback speeds per YouTube Channel ID / Handle in `chrome.s
   - *Critical Insight*: `<head>` meta tags (`<link itemprop="name">`) are static and do NOT update on YouTube SPA video navigation.
   - *Solution*: Always prioritize dynamic DOM elements inside `ytd-watch-metadata #channel-name a` or `ytd-video-owner-renderer #channel-name a` using `innerText` over static meta tags.
 - **Playback Control**: Direct manipulation of `HTMLMediaElement.playbackRate` on `document.querySelector('video')`.
+- **Vivaldi Extension Toolbar Behavior**:
+  - *Insight*: Vivaldi's custom React-based UI handles extension action icons dynamically and may periodically toggle icon visibility, extension popup button state, or tint toolbar icons depending on active tab matches, address bar customization, or theme scaling.
 
 ## Internationalization (i18n) Guidelines
 - **Mandatory for New Features**: All new UI components, user-facing labels, badges, buttons, tooltips, or dynamic status text MUST be internationalized using `chrome.i18n.getMessage(...)` and `_locales/`.
