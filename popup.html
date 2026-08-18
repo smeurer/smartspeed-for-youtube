@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartSpeed for YouTube</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon>
+          <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line>
+        </svg>
+        <span class="logo-title">SmartSpeed</span>
+      </div>
+      <span class="version-badge">v1.0</span>
+    </header>
+
+    <!-- Active Channel Section -->
+    <section class="card active-channel-card">
+      <div class="card-header">
+        <span class="card-subtitle">Aktueller Kanal</span>
+        <span id="active-channel-badge" class="badge badge-inactive">Kein Video</span>
+      </div>
+
+      <div class="channel-info-row">
+        <div class="channel-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="channel-text">
+          <div id="active-channel-name" class="channel-name">Kein YouTube Video geladen</div>
+          <div id="active-channel-handle" class="channel-handle">Befinde dich auf youtube.com/watch...</div>
+        </div>
+      </div>
+
+      <div class="speed-controls" id="speed-controls-group">
+        <div class="speed-value-display">
+          <span class="label">Geschwindigkeit</span>
+          <span id="current-speed-label" class="speed-number">1.0x</span>
+        </div>
+
+        <!-- Slider -->
+        <div class="slider-container">
+          <input type="range" id="speed-slider" min="0.5" max="3.0" step="0.05" value="1.0">
+        </div>
+
+        <!-- Speed Presets -->
+        <div class="preset-buttons">
+          <button class="btn-preset" data-speed="1.0">1.0x</button>
+          <button class="btn-preset" data-speed="1.25">1.25x</button>
+          <button class="btn-preset" data-speed="1.3">1.3x</button>
+          <button class="btn-preset" data-speed="1.5">1.5x</button>
+          <button class="btn-preset" data-speed="1.75">1.75x</button>
+          <button class="btn-preset" data-speed="2.0">2.0x</button>
+        </div>
+
+        <div class="action-buttons">
+          <button id="btn-save-channel" class="btn btn-primary" disabled>
+            Kanal-Speed Speichern
+          </button>
+          <button id="btn-reset-channel" class="btn btn-secondary" disabled>
+            Zurücksetzen
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Default Speed Section -->
+    <section class="card default-speed-card">
+      <div class="card-header-compact">
+        <span class="card-subtitle">Standard für unkonfigurierte Kanäle</span>
+        <span id="default-speed-value" class="speed-pill">1.0x</span>
+      </div>
+      <div class="default-speed-row">
+        <input type="range" id="default-speed-slider" min="0.5" max="3.0" step="0.05" value="1.0">
+      </div>
+    </section>
+
+    <!-- Saved Channels List -->
+    <section class="card saved-channels-card">
+      <div class="card-header">
+        <span class="card-subtitle">Gespeicherte Kanäle</span>
+        <span id="saved-count-badge" class="count-badge">0</span>
+      </div>
+
+      <div id="saved-channels-list" class="saved-channels-list">
+        <div class="empty-state">Noch keine Kanäle gespeichert.</div>
+      </div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
