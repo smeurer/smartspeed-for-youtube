@@ -23,8 +23,8 @@
     <!-- Active Channel Section -->
     <section class="card active-channel-card">
       <div class="card-header">
-        <span class="card-subtitle">Aktueller Kanal</span>
-        <span id="active-channel-badge" class="badge badge-inactive">Kein Video</span>
+        <span class="card-subtitle" data-i18n="currentChannel">Aktueller Kanal</span>
+        <span id="active-channel-badge" class="badge badge-inactive" data-i18n="badgeNoVideo">Kein Video</span>
       </div>
 
       <div class="channel-info-row">
@@ -35,14 +35,14 @@
           </svg>
         </div>
         <div class="channel-text">
-          <div id="active-channel-name" class="channel-name">Kein YouTube Video geladen</div>
-          <div id="active-channel-handle" class="channel-handle">Befinde dich auf youtube.com/watch...</div>
+          <div id="active-channel-name" class="channel-name" data-i18n="noVideoLoaded">Kein YouTube Video geladen</div>
+          <div id="active-channel-handle" class="channel-handle" data-i18n="openWatchPage">Befinde dich auf youtube.com/watch...</div>
         </div>
       </div>
 
       <div class="speed-controls" id="speed-controls-group">
         <div class="speed-value-display">
-          <span class="label">Geschwindigkeit</span>
+          <span class="label" data-i18n="speedLabel">Geschwindigkeit</span>
           <span id="current-speed-label" class="speed-number">1.0x</span>
         </div>
 
@@ -62,10 +62,10 @@
         </div>
 
         <div class="action-buttons">
-          <button id="btn-save-channel" class="btn btn-primary" disabled>
+          <button id="btn-save-channel" class="btn btn-primary" disabled data-i18n="btnSaveChannel">
             Kanal-Speed Speichern
           </button>
-          <button id="btn-reset-channel" class="btn btn-secondary" disabled>
+          <button id="btn-reset-channel" class="btn btn-secondary" disabled data-i18n="btnResetChannel">
             Zurücksetzen
           </button>
         </div>
@@ -75,7 +75,7 @@
     <!-- Global Default Speed Section -->
     <section class="card default-speed-card">
       <div class="card-header-compact">
-        <span class="card-subtitle">Standard für unkonfigurierte Kanäle</span>
+        <span class="card-subtitle" data-i18n="defaultSpeedTitle">Standard für unkonfigurierte Kanäle</span>
         <span id="default-speed-value" class="speed-pill">1.0x</span>
       </div>
       <div class="default-speed-row">
@@ -86,12 +86,12 @@
     <!-- Saved Channels List -->
     <section class="card saved-channels-card">
       <div class="card-header">
-        <span class="card-subtitle">Gespeicherte Kanäle</span>
+        <span class="card-subtitle" data-i18n="savedChannelsTitle">Gespeicherte Kanäle</span>
         <span id="saved-count-badge" class="count-badge">0</span>
       </div>
 
       <div id="saved-channels-list" class="saved-channels-list">
-        <div class="empty-state">Noch keine Kanäle gespeichert.</div>
+        <div class="empty-state" data-i18n="emptySavedChannels">Noch keine Kanäle gespeichert.</div>
       </div>
     </section>
   </div>

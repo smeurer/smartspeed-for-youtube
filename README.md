@@ -8,6 +8,7 @@ A browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google C
 - **Manifest V3 Compliant**: Built natively for modern Chromium extension standards.
 - **Clean Popup UI**: Manage default and channel-specific speeds directly from the extension popup without intrusive UI overlays injected into YouTube's webpage.
 - **Robust SPA Navigation Handling**: Seamlessly detects video and channel changes on YouTube without requiring full page reloads.
+- **Internationalized (i18n)**: Fully localized in English (`en`) and German (`de`), automatically adjusting to your browser's language setting.
 
 ---
 
@@ -31,3 +32,18 @@ A browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google C
 2. Click the **SmartSpeed** extension icon in your browser toolbar.
 3. Choose your target playback speed (e.g., `1.3x`) and click **Save Channel Speed**.
 4. Future videos from this channel will automatically play at your chosen speed!
+
+---
+
+## Testing & i18n Validation
+
+To verify that all user-facing strings are properly internationalized and synchronized between languages:
+
+```bash
+npm test
+```
+or
+```bash
+node scripts/check_i18n.js
+```
+

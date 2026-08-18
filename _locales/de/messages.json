@@ -1,0 +1,62 @@
+{
+  "extName": {
+    "message": "SmartSpeed for YouTube",
+    "description": "Der Name der Extension."
+  },
+  "extDescription": {
+    "message": "Speichert und stellt automatisch individuelle Wiedergabegeschwindigkeiten pro YouTube-Kanal ein.",
+    "description": "Die Beschreibung der Extension."
+  },
+  "currentChannel": {
+    "message": "Aktueller Kanal",
+    "description": "Untertitel für die Karte des aktuellen Kanals."
+  },
+  "badgeNoVideo": {
+    "message": "Kein Video",
+    "description": "Badge wenn kein aktives YouTube-Video geöffnet ist."
+  },
+  "badgeActive": {
+    "message": "Aktiv",
+    "description": "Badge wenn der aktuelle Kanal mit Standardgeschwindigkeit läuft."
+  },
+  "badgeSaved": {
+    "message": "Gespeichert",
+    "description": "Badge wenn für den aktuellen Kanal eine eigene Geschwindigkeit gespeichert ist."
+  },
+  "noVideoLoaded": {
+    "message": "Kein YouTube Video geladen",
+    "description": "Platzhaltertext wenn kein YouTube-Video aktiv ist."
+  },
+  "openWatchPage": {
+    "message": "Befinde dich auf youtube.com/watch...",
+    "description": "Hinweistext für den aktiven Tab."
+  },
+  "speedLabel": {
+    "message": "Geschwindigkeit",
+    "description": "Beschriftung der Geschwindigkeitsanzeige."
+  },
+  "btnSaveChannel": {
+    "message": "Kanal-Speed Speichern",
+    "description": "Button zum Speichern der Geschwindigkeit für den Kanal."
+  },
+  "btnResetChannel": {
+    "message": "Zurücksetzen",
+    "description": "Button zum Zurücksetzen der Kanal-Geschwindigkeit auf Standard."
+  },
+  "defaultSpeedTitle": {
+    "message": "Standard für unkonfigurierte Kanäle",
+    "description": "Bereichsüberschrift für die globale Standardgeschwindigkeit."
+  },
+  "savedChannelsTitle": {
+    "message": "Gespeicherte Kanäle",
+    "description": "Bereichsüberschrift für die Liste gespeicherter Kanäle."
+  },
+  "emptySavedChannels": {
+    "message": "Noch keine Kanäle gespeichert.",
+    "description": "Hinweis wenn keine gespeicherten Kanäle vorhanden sind."
+  },
+  "deleteItemTitle": {
+    "message": "Löschen",
+    "description": "Tooltip-Titel für das Löschen eines gespeicherten Kanals."
+  }
+}

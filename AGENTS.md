@@ -18,3 +18,9 @@ Stores custom video playback speeds per YouTube Channel ID / Handle in `chrome.s
   - *Critical Insight*: `<head>` meta tags (`<link itemprop="name">`) are static and do NOT update on YouTube SPA video navigation.
   - *Solution*: Always prioritize dynamic DOM elements inside `ytd-watch-metadata #channel-name a` or `ytd-video-owner-renderer #channel-name a` using `innerText` over static meta tags.
 - **Playback Control**: Direct manipulation of `HTMLMediaElement.playbackRate` on `document.querySelector('video')`.
+
+## Internationalization (i18n) Guidelines
+- **Mandatory for New Features**: All new UI components, user-facing labels, badges, buttons, tooltips, or dynamic status text MUST be internationalized using `chrome.i18n.getMessage(...)` and `_locales/`.
+- **Supported Locales**: Both `_locales/en/messages.json` (Default) and `_locales/de/messages.json` MUST be updated in sync whenever new keys are added.
+- **Validation Script**: Run `node scripts/check_i18n.js` (or `npm test`) whenever adding UI features to verify that no untranslated or missing keys exist across languages.
+

@@ -1,6 +1,22 @@
 // SmartSpeed for YouTube - Popup Script
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Internationalization Helper
+  localizeHTML();
+
+  function localizeHTML() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const msg = chrome.i18n.getMessage(key);
+      if (msg) el.textContent = msg;
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      const msg = chrome.i18n.getMessage(key);
+      if (msg) el.setAttribute('title', msg);
+    });
+  }
+
   // Elements
   const activeChannelBadge = document.getElementById('active-channel-badge');
   const activeChannelName = document.getElementById('active-channel-name');
@@ -42,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         activeChannel = response.channelInfo;
         const currentSpeed = response.speed || defaultSpeed;
 
-        activeChannelBadge.textContent = response.isCustom ? 'Gespeichert' : 'Aktiv';
+        activeChannelBadge.textContent = response.isCustom ? chrome.i18n.getMessage('badgeSaved') : chrome.i18n.getMessage('badgeActive');
         activeChannelBadge.className = 'badge badge-active';
         activeChannelName.textContent = activeChannel.name || activeChannel.handle;
         activeChannelHandle.textContent = activeChannel.handle;
@@ -78,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     savedCountBadge.textContent = keys.length;
 
     if (keys.length === 0) {
-      savedChannelsList.innerHTML = '<div class="empty-state">Noch keine Kanäle gespeichert.</div>';
+      savedChannelsList.innerHTML = `<div class="empty-state">${chrome.i18n.getMessage('emptySavedChannels')}</div>`;
       return;
     }
 
@@ -88,6 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.className = 'saved-item';
 
       const speedVal = parseFloat(speeds[handle]).toFixed(2).replace(/\.00$/, '.0').replace(/(\.\d)0$/, '$1') + 'x';
+      const deleteTitle = chrome.i18n.getMessage('deleteItemTitle');
 
       item.innerHTML = `
         <div class="saved-item-info">
@@ -95,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <div class="saved-item-right">
           <span class="saved-item-speed">${speedVal}</span>
-          <button class="btn-delete-item" data-handle="${handle}" title="Löschen">
+          <button class="btn-delete-item" data-handle="${handle}" title="${deleteTitle}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -112,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // If current active channel was deleted, update controls
         if (activeChannel && activeChannel.handle === handleToDelete) {
-          activeChannelBadge.textContent = 'Aktiv';
+          activeChannelBadge.textContent = chrome.i18n.getMessage('badgeActive');
           btnResetChannel.disabled = true;
           setSpeedDisplay(defaultSpeed);
           notifyActiveTab(defaultSpeed);
@@ -161,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     channelSpeeds[activeChannel.handle] = speed;
     await chrome.storage.local.set({ channelSpeeds });
 
-    activeChannelBadge.textContent = 'Gespeichert';
+    activeChannelBadge.textContent = chrome.i18n.getMessage('badgeSaved');
     btnResetChannel.disabled = false;
 
     renderSavedChannelsList(channelSpeeds);
@@ -173,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     delete channelSpeeds[activeChannel.handle];
     await chrome.storage.local.set({ channelSpeeds });
 
-    activeChannelBadge.textContent = 'Aktiv';
+    activeChannelBadge.textContent = chrome.i18n.getMessage('badgeActive');
     btnResetChannel.disabled = true;
 
     setSpeedDisplay(defaultSpeed);

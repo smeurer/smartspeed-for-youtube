@@ -1,0 +1,62 @@
+{
+  "extName": {
+    "message": "SmartSpeed for YouTube",
+    "description": "The name of the extension."
+  },
+  "extDescription": {
+    "message": "Saves and automatically sets custom video playback speeds per YouTube channel.",
+    "description": "The description of the extension."
+  },
+  "currentChannel": {
+    "message": "Current Channel",
+    "description": "Subtitle for the current channel card."
+  },
+  "badgeNoVideo": {
+    "message": "No Video",
+    "description": "Badge when no active YouTube video tab is open."
+  },
+  "badgeActive": {
+    "message": "Active",
+    "description": "Badge when active channel is playing default speed."
+  },
+  "badgeSaved": {
+    "message": "Saved",
+    "description": "Badge when active channel has a saved custom speed."
+  },
+  "noVideoLoaded": {
+    "message": "No YouTube Video loaded",
+    "description": "Placeholder text when active tab is not a YouTube video."
+  },
+  "openWatchPage": {
+    "message": "Navigate to youtube.com/watch...",
+    "description": "Subtext instruction for active tab."
+  },
+  "speedLabel": {
+    "message": "Speed",
+    "description": "Label for the speed display."
+  },
+  "btnSaveChannel": {
+    "message": "Save Channel Speed",
+    "description": "Button to save speed for active channel."
+  },
+  "btnResetChannel": {
+    "message": "Reset",
+    "description": "Button to reset channel speed to default."
+  },
+  "defaultSpeedTitle": {
+    "message": "Default for unconfigured channels",
+    "description": "Section header for global default speed."
+  },
+  "savedChannelsTitle": {
+    "message": "Saved Channels",
+    "description": "Section header for saved channels list."
+  },
+  "emptySavedChannels": {
+    "message": "No channels saved yet.",
+    "description": "Empty state message when no saved channels exist."
+  },
+  "deleteItemTitle": {
+    "message": "Delete",
+    "description": "Tooltip title for deleting a saved channel."
+  }
+}

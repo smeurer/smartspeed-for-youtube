@@ -1,0 +1,17 @@
+{
+  "name": "smartspeed-for-youtube",
+  "version": "1.0.0",
+  "description": "Chrome extension to automatically set custom YouTube playback speeds per channel.",
+  "scripts": {
+    "test": "node scripts/check_i18n.js",
+    "test:i18n": "node scripts/check_i18n.js"
+  },
+  "keywords": [
+    "youtube",
+    "chrome-extension",
+    "speed-controller",
+    "manifest-v3"
+  ],
+  "author": "",
+  "license": "MIT"
+}
