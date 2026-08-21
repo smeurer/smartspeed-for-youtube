@@ -4,8 +4,16 @@
     "description": "Der Name der Extension."
   },
   "extDescription": {
-    "message": "Eigene Wiedergabegeschwindigkeit & intelligentes Auto-Like pro YouTube-Kanal.",
+    "message": "Eigene Wiedergabegeschwindigkeit, Lautstärke & intelligentes Auto-Like pro YouTube-Kanal.",
     "description": "Die Beschreibung der Extension."
+  },
+  "volumeLabel": {
+    "message": "Wiedergabelautstärke",
+    "description": "Beschriftung der Lautstärkeanzeige."
+  },
+  "defaultVolumeLabel": {
+    "message": "Standard-Lautstärke",
+    "description": "Beschriftung für Standard-Lautstärke."
   },
   "currentChannel": {
     "message": "Aktueller Kanal",
@@ -82,5 +90,9 @@
   "deleteItemTitle": {
     "message": "Löschen",
     "description": "Tooltip-Titel für das Löschen eines gespeicherten Kanals."
+  },
+  "disabledTooltip": {
+    "message": "SmartTube: Nur auf YouTube aktiv",
+    "description": "Tooltip wenn das Icon deaktiviert ist (keine YouTube-Seite)."
   }
 }

@@ -131,7 +131,8 @@ const filesToScan = [
   path.join(ROOT_DIR, 'manifest.json'),
   path.join(ROOT_DIR, 'popup.html'),
   path.join(ROOT_DIR, 'popup.js'),
-  path.join(ROOT_DIR, 'content.js')
+  path.join(ROOT_DIR, 'content.js'),
+  path.join(ROOT_DIR, 'background.js')
 ];
 
 filesToScan.forEach(scanFileContent);

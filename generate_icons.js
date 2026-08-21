@@ -3,6 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
+// Icon color variants: accent (red) for active YouTube, gray for disabled
+const ICON_VARIANTS = [
+  { suffix: '',       r: 255, g: 42,  b: 75 },   // Red accent #ff2a4b (active on YouTube)
+  { suffix: '_gray',  r: 108, g: 117, b: 125 }, // Gray #6c757d (disabled/inactive)
+];
+
 function generatePngBuffer(width, height, r, g, b) {
   // PNG signature
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -24,7 +30,6 @@ function generatePngBuffer(width, height, r, g, b) {
     const row = Buffer.alloc(1 + width * 3);
     row[0] = 0; // no filter
     for (let x = 0; x < width; x++) {
-      // Draw play symbol / stylized shape if size >= 48
       const cx = width / 2;
       const cy = height / 2;
       const radius = width / 2 - 1;
@@ -35,9 +40,9 @@ function generatePngBuffer(width, height, r, g, b) {
       let pixelG = g;
       let pixelB = b;
 
-      // Outer circle fill (red accent #ff2a4b)
+      // Outer circle fill (accent color)
       if (dx * dx + dy * dy <= radius * radius) {
-        // Draw play triangle in white inside
+        // Draw play triangle in white inside (always white for contrast)
         const inPlayTriangle = (x >= width * 0.38 && x <= width * 0.68 &&
           Math.abs(y - cy) <= (x - width * 0.38) * 0.8);
         if (inPlayTriangle) {
@@ -46,7 +51,7 @@ function generatePngBuffer(width, height, r, g, b) {
           pixelB = 255;
         }
       } else {
-        // Transparent / background dark
+        // Background dark
         pixelR = 13;
         pixelG = 15;
         pixelB = 20;
@@ -100,8 +105,11 @@ if (!fs.existsSync(iconsDir)) {
   fs.mkdirSync(iconsDir, { recursive: true });
 }
 
-[16, 48, 128].forEach(size => {
-  const iconBuffer = generatePngBuffer(size, size, 255, 42, 75);
-  fs.writeFileSync(path.join(iconsDir, `icon${size}.png`), iconBuffer);
-  console.log(`Generated icon${size}.png (${size}x${size})`);
+[16, 32, 48, 128].forEach(size => {
+  ICON_VARIANTS.forEach(({ suffix, r, g, b }) => {
+    const iconBuffer = generatePngBuffer(size, size, r, g, b);
+    const filename = suffix ? `icon${size}${suffix}.png` : `icon${size}.png`;
+    fs.writeFileSync(path.join(iconsDir, filename), iconBuffer);
+    console.log(`Generated ${filename} (${size}x${size})`);
+  });
 });

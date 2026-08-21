@@ -348,11 +348,11 @@ input[type=range]::-webkit-slider-thumb {
 /* Presets */
 .preset-buttons {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
   gap: 4px;
 }
 
-.btn-preset {
+.btn-preset, .btn-preset-vol {
   background: #2a2a2a;
   border: 1px solid #3a3a3a;
   color: var(--text-primary);
@@ -361,14 +361,15 @@ input[type=range]::-webkit-slider-thumb {
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
+  text-align: center;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.btn-preset:hover {
+.btn-preset:hover, .btn-preset-vol:hover {
   background: #353535;
 }
 
-.btn-preset.active {
+.btn-preset.active, .btn-preset-vol.active {
   background: var(--accent-blue);
   border-color: var(--accent-blue);
   color: #000;
@@ -466,6 +467,10 @@ input[type=range]::-webkit-slider-thumb {
 
 .pill-badge-like {
   color: #ff4e45;
+}
+
+.pill-badge-vol {
+  color: #65b8ff;
 }
 
 .btn-delete-item {

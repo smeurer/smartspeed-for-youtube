@@ -1,10 +1,17 @@
-// SmartTube: Speed & Auto-Like for YouTube - Content Script
+// SmartTube: Speed, Volume & Auto-Like for YouTube - Content Script
 
 let currentChannelInfo = null;
 let targetSpeed = 1.0;
 let isSettingSpeed = false;
+let targetVolume = 100;
+let isSettingVolume = false;
 let lastUrl = location.href;
 let retryTimer = null;
+
+// Helper to prevent "Extension context invalidated" errors when extension is reloaded
+function isContextValid() {
+  return typeof chrome !== 'undefined' && chrome.runtime && !!chrome.runtime.id;
+}
 
 // Track auto-liked video IDs in current session to prevent repeated triggers
 let lastLikedVideoId = null;
@@ -76,14 +83,30 @@ function getCurrentVideoId() {
   return urlParams.get('v');
 }
 
-// 2. Playback Speed Application
-async function updatePlaybackSpeed() {
+// 2. Playback Speed & Volume Application
+async function updatePlaybackSettings() {
+  if (!isContextValid()) return false;
+
   const channelInfo = getYouTubeChannelInfo();
   currentChannelInfo = channelInfo;
 
-  const storage = await chrome.storage.local.get(['channelSpeeds', 'defaultSpeed']);
+  let storage = {};
+  try {
+    storage = await new Promise((resolve) => {
+      if (!isContextValid()) return resolve({});
+      chrome.storage.local.get(['channelSpeeds', 'defaultSpeed', 'channelVolumes', 'defaultVolume'], (res) => {
+        if (chrome.runtime?.lastError) return resolve({});
+        resolve(res || {});
+      });
+    });
+  } catch (err) {
+    return false;
+  }
+
   const channelSpeeds = storage.channelSpeeds || {};
   const defaultSpeed = parseFloat(storage.defaultSpeed) || 1.0;
+  const channelVolumes = storage.channelVolumes || {};
+  const defaultVolume = storage.defaultVolume !== undefined ? parseInt(storage.defaultVolume) : 100;
 
   if (channelInfo && channelSpeeds[channelInfo.handle] !== undefined) {
     targetSpeed = parseFloat(channelSpeeds[channelInfo.handle]);
@@ -93,7 +116,25 @@ async function updatePlaybackSpeed() {
     targetSpeed = defaultSpeed;
   }
 
+  if (channelInfo && channelVolumes[channelInfo.handle] !== undefined) {
+    targetVolume = parseInt(channelVolumes[channelInfo.handle]);
+  } else if (channelInfo && channelInfo.channelId && channelVolumes[channelInfo.channelId] !== undefined) {
+    targetVolume = parseInt(channelVolumes[channelInfo.channelId]);
+  } else {
+    targetVolume = defaultVolume;
+  }
+
   applySpeedToVideo(targetSpeed);
+  applyVolumeToVideo(targetVolume);
+
+  if (channelInfo && isContextValid()) {
+    try {
+      chrome.runtime.sendMessage({ type: 'CHANNEL_STATUS_CHANGED' }, () => {
+        if (chrome.runtime?.lastError) {}
+      });
+    } catch (e) {}
+  }
+
   return channelInfo !== null;
 }
 
@@ -105,6 +146,21 @@ function applySpeedToVideo(speed) {
     isSettingSpeed = true;
     video.playbackRate = speed;
     setTimeout(() => { isSettingSpeed = false; }, 300);
+  }
+}
+
+function applyVolumeToVideo(volumePercent) {
+  const video = document.querySelector('video');
+  if (!video) return;
+
+  const targetVol = Math.max(0, Math.min(1, volumePercent / 100));
+  if (Math.abs(video.volume - targetVol) > 0.01) {
+    isSettingVolume = true;
+    video.volume = targetVol;
+    if (volumePercent > 0 && video.muted) {
+      video.muted = false;
+    }
+    setTimeout(() => { isSettingVolume = false; }, 300);
   }
 }
 
@@ -142,6 +198,8 @@ function isVideoAlreadyLiked(likeButton) {
 }
 
 async function checkAndApplyAutoLike() {
+  if (!isContextValid()) return;
+
   const videoId = getCurrentVideoId();
   if (!videoId || lastLikedVideoId === videoId) return;
 
@@ -151,7 +209,18 @@ async function checkAndApplyAutoLike() {
   const video = document.querySelector('video');
   if (!video || !video.duration || isNaN(video.duration) || video.duration <= 0) return;
 
-  const storage = await chrome.storage.local.get(['channelLikes', 'defaultAutoLike']);
+  let storage = {};
+  try {
+    storage = await new Promise((resolve) => {
+      if (!isContextValid()) return resolve({});
+      chrome.storage.local.get(['channelLikes', 'defaultAutoLike'], (res) => {
+        if (chrome.runtime?.lastError) return resolve({});
+        resolve(res || {});
+      });
+    });
+  } catch (err) {
+    return;
+  }
   const channelLikes = storage.channelLikes || {};
   const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
 
@@ -205,7 +274,7 @@ function startRetryLoop() {
   let attempts = 0;
   retryTimer = setInterval(async () => {
     attempts++;
-    const found = await updatePlaybackSpeed();
+    const found = await updatePlaybackSettings();
     if ((found && currentChannelInfo) || attempts >= 15) {
       clearInterval(retryTimer);
       retryTimer = null;
@@ -223,7 +292,7 @@ function handleNavigation() {
   }
 
   currentChannelInfo = null;
-  updatePlaybackSpeed();
+  updatePlaybackSettings();
   startRetryLoop();
 }
 
@@ -266,12 +335,14 @@ function initAutoSpeedController() {
   document.addEventListener('loadedmetadata', (e) => {
     if (e.target && e.target.tagName === 'VIDEO') {
       applySpeedToVideo(targetSpeed);
+      applyVolumeToVideo(targetVolume);
     }
   }, true);
 
   document.addEventListener('play', (e) => {
     if (e.target && e.target.tagName === 'VIDEO') {
       applySpeedToVideo(targetSpeed);
+      applyVolumeToVideo(targetVolume);
     }
   }, true);
 
@@ -293,50 +364,74 @@ function initAutoSpeedController() {
 
 // 6. Messaging interface for Extension Popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!isContextValid()) return false;
+
   if (message.type === 'GET_CURRENT_INFO') {
     const channelInfo = getYouTubeChannelInfo() || currentChannelInfo;
-    chrome.storage.local.get(['channelSpeeds', 'defaultSpeed', 'channelLikes', 'defaultAutoLike'], (storage) => {
-      const channelSpeeds = storage.channelSpeeds || {};
-      const defaultSpeed = parseFloat(storage.defaultSpeed) || 1.0;
-      const channelLikes = storage.channelLikes || {};
-      const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
+    try {
+      if (!isContextValid()) return false;
+      chrome.storage.local.get(['channelSpeeds', 'defaultSpeed', 'channelVolumes', 'defaultVolume', 'channelLikes', 'defaultAutoLike'], (storage) => {
+        if (!isContextValid() || chrome.runtime?.lastError) return;
+        const channelSpeeds = storage.channelSpeeds || {};
+        const defaultSpeed = parseFloat(storage.defaultSpeed) || 1.0;
+        const channelVolumes = storage.channelVolumes || {};
+        const defaultVolume = storage.defaultVolume !== undefined ? parseInt(storage.defaultVolume) : 100;
+        const channelLikes = storage.channelLikes || {};
+        const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
 
-      let speed = defaultSpeed;
-      let isCustomSpeed = false;
+        let speed = defaultSpeed;
+        let isCustomSpeed = false;
 
-      let likeConfig = defaultAutoLike;
-      let isCustomLike = false;
+        let volume = defaultVolume;
+        let isCustomVolume = false;
 
-      if (channelInfo) {
-        if (channelSpeeds[channelInfo.handle] !== undefined) {
-          speed = parseFloat(channelSpeeds[channelInfo.handle]);
-          isCustomSpeed = true;
-        } else if (channelInfo.channelId && channelSpeeds[channelInfo.channelId] !== undefined) {
-          speed = parseFloat(channelSpeeds[channelInfo.channelId]);
-          isCustomSpeed = true;
+        let likeConfig = defaultAutoLike;
+        let isCustomLike = false;
+
+        if (channelInfo) {
+          if (channelSpeeds[channelInfo.handle] !== undefined) {
+            speed = parseFloat(channelSpeeds[channelInfo.handle]);
+            isCustomSpeed = true;
+          } else if (channelInfo.channelId && channelSpeeds[channelInfo.channelId] !== undefined) {
+            speed = parseFloat(channelSpeeds[channelInfo.channelId]);
+            isCustomSpeed = true;
+          }
+
+          if (channelVolumes[channelInfo.handle] !== undefined) {
+            volume = parseInt(channelVolumes[channelInfo.handle]);
+            isCustomVolume = true;
+          } else if (channelInfo.channelId && channelVolumes[channelInfo.channelId] !== undefined) {
+            volume = parseInt(channelVolumes[channelInfo.channelId]);
+            isCustomVolume = true;
+          }
+
+          if (channelLikes[channelInfo.handle] !== undefined) {
+            likeConfig = channelLikes[channelInfo.handle];
+            isCustomLike = true;
+          } else if (channelInfo.channelId && channelLikes[channelInfo.channelId] !== undefined) {
+            likeConfig = channelLikes[channelInfo.channelId];
+            isCustomLike = true;
+          }
         }
 
-        if (channelLikes[channelInfo.handle] !== undefined) {
-          likeConfig = channelLikes[channelInfo.handle];
-          isCustomLike = true;
-        } else if (channelInfo.channelId && channelLikes[channelInfo.channelId] !== undefined) {
-          likeConfig = channelLikes[channelInfo.channelId];
-          isCustomLike = true;
-        }
-      }
-
-      sendResponse({
-        isWatchPage: window.location.pathname.startsWith('/watch'),
-        channelInfo: channelInfo,
-        speed: speed,
-        defaultSpeed: defaultSpeed,
-        isCustomSpeed: isCustomSpeed,
-        likeConfig: likeConfig,
-        defaultAutoLike: defaultAutoLike,
-        isCustomLike: isCustomLike,
-        isCustom: isCustomSpeed || isCustomLike
+        try {
+          sendResponse({
+            isWatchPage: window.location.pathname.startsWith('/watch'),
+            channelInfo: channelInfo,
+            speed: speed,
+            defaultSpeed: defaultSpeed,
+            isCustomSpeed: isCustomSpeed,
+            volume: volume,
+            defaultVolume: defaultVolume,
+            isCustomVolume: isCustomVolume,
+            likeConfig: likeConfig,
+            defaultAutoLike: defaultAutoLike,
+            isCustomLike: isCustomLike,
+            isCustom: isCustomSpeed || isCustomVolume || isCustomLike
+          });
+        } catch (e) {}
       });
-    });
+    } catch (e) {}
     return true; // Keep sendResponse async channel open
   }
 
@@ -344,6 +439,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.speed !== undefined) {
       targetSpeed = parseFloat(message.speed);
       applySpeedToVideo(targetSpeed);
+    }
+    sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.type === 'APPLY_VOLUME_IMMEDIATELY') {
+    if (message.volume !== undefined) {
+      targetVolume = parseInt(message.volume);
+      applyVolumeToVideo(targetVolume);
     }
     sendResponse({ success: true });
     return true;

@@ -1,4 +1,4 @@
-// SmartTube: Speed & Auto-Like - Popup Script
+// SmartTube: Speed, Volume & Auto-Like - Popup Script
 
 document.addEventListener('DOMContentLoaded', async () => {
   applyLocalization();
@@ -30,6 +30,10 @@ const speedSlider = document.getElementById('speed-slider');
 const currentSpeedLabel = document.getElementById('current-speed-label');
 const presetButtons = document.querySelectorAll('.btn-preset');
 
+const volumeSlider = document.getElementById('volume-slider');
+const currentVolumeLabel = document.getElementById('current-volume-label');
+const presetVolButtons = document.querySelectorAll('.btn-preset-vol');
+
 const autoLikeToggle = document.getElementById('auto-like-toggle');
 const likeThresholdGroup = document.getElementById('like-threshold-group');
 const likeModeSelect = document.getElementById('like-mode-select');
@@ -41,6 +45,9 @@ const btnResetChannel = document.getElementById('btn-reset-channel');
 
 const defaultSpeedSlider = document.getElementById('default-speed-slider');
 const defaultSpeedValue = document.getElementById('default-speed-value');
+
+const defaultVolumeSlider = document.getElementById('default-volume-slider');
+const defaultVolumeValue = document.getElementById('default-volume-value');
 
 const defaultLikeToggle = document.getElementById('default-like-toggle');
 const defaultLikeThresholdGroup = document.getElementById('default-like-threshold-group');
@@ -78,6 +85,22 @@ function setupEventListeners() {
     });
   });
 
+  // Volume Slider & Presets
+  volumeSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    updateVolumeDisplay(val);
+    applyVolumeToActiveTab(val);
+  });
+
+  presetVolButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const vol = parseInt(btn.getAttribute('data-volume'));
+      volumeSlider.value = vol;
+      updateVolumeDisplay(vol);
+      applyVolumeToActiveTab(vol);
+    });
+  });
+
   // Like Toggle & Mode Select
   autoLikeToggle.addEventListener('change', () => {
     toggleThresholdGroupUI(likeThresholdGroup, autoLikeToggle.checked);
@@ -101,6 +124,13 @@ function setupEventListeners() {
     const val = parseFloat(e.target.value).toFixed(2);
     defaultSpeedValue.innerText = `${val}x`;
     chrome.storage.local.set({ defaultSpeed: val });
+  });
+
+  // Global Default Volume
+  defaultVolumeSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    defaultVolumeValue.innerText = `${val}%`;
+    chrome.storage.local.set({ defaultVolume: val });
   });
 
   // Global Default Auto-Like
@@ -159,6 +189,20 @@ function updateSpeedDisplay(val) {
   });
 }
 
+function updateVolumeDisplay(val) {
+  const numVal = parseInt(val);
+  currentVolumeLabel.innerText = `${numVal}%`;
+
+  presetVolButtons.forEach(btn => {
+    const btnVol = parseInt(btn.getAttribute('data-volume'));
+    if (btnVol === numVal) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
 function applySpeedToActiveTab(speed) {
   if (!currentTabId) return;
   chrome.tabs.sendMessage(currentTabId, {
@@ -171,13 +215,29 @@ function applySpeedToActiveTab(speed) {
   });
 }
 
+function applyVolumeToActiveTab(volume) {
+  if (!currentTabId) return;
+  chrome.tabs.sendMessage(currentTabId, {
+    type: 'APPLY_VOLUME_IMMEDIATELY',
+    volume: volume
+  }, () => {
+    if (chrome.runtime.lastError) {
+      // Ignore tab message errors if content script not listening
+    }
+  });
+}
+
 async function loadGlobalDefaults() {
-  const storage = await chrome.storage.local.get(['defaultSpeed', 'defaultAutoLike']);
+  const storage = await chrome.storage.local.get(['defaultSpeed', 'defaultVolume', 'defaultAutoLike']);
   const defaultSpeed = parseFloat(storage.defaultSpeed) || 1.0;
+  const defaultVolume = storage.defaultVolume !== undefined ? parseInt(storage.defaultVolume) : 100;
   const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
 
   defaultSpeedSlider.value = defaultSpeed;
   defaultSpeedValue.innerText = `${defaultSpeed.toFixed(2)}x`;
+
+  defaultVolumeSlider.value = defaultVolume;
+  defaultVolumeValue.innerText = `${defaultVolume}%`;
 
   defaultLikeToggle.checked = !!defaultAutoLike.enabled;
   toggleThresholdGroupUI(defaultLikeThresholdGroup, defaultLikeToggle.checked);
@@ -243,6 +303,11 @@ function renderActiveChannelState(data) {
   speedSlider.value = speed;
   updateSpeedDisplay(speed);
 
+  // Volume
+  const volume = data.volume !== undefined ? parseInt(data.volume) : 100;
+  volumeSlider.value = volume;
+  updateVolumeDisplay(volume);
+
   // Auto-Like
   const likeConfig = data.likeConfig || { enabled: false, mode: 'percent', value: 30 };
   autoLikeToggle.checked = !!likeConfig.enabled;
@@ -262,25 +327,30 @@ async function saveActiveChannelRules() {
 
   const handle = activeChannel.handle;
   const speedVal = parseFloat(speedSlider.value);
+  const volumeVal = parseInt(volumeSlider.value);
   const likeConfig = {
     enabled: autoLikeToggle.checked,
     mode: likeModeSelect.value,
     value: parseInt(likeValueSlider.value)
   };
 
-  const storage = await chrome.storage.local.get(['channelSpeeds', 'channelLikes']);
+  const storage = await chrome.storage.local.get(['channelSpeeds', 'channelVolumes', 'channelLikes']);
   const channelSpeeds = storage.channelSpeeds || {};
+  const channelVolumes = storage.channelVolumes || {};
   const channelLikes = storage.channelLikes || {};
 
   channelSpeeds[handle] = speedVal;
+  channelVolumes[handle] = volumeVal;
   channelLikes[handle] = likeConfig;
 
-  await chrome.storage.local.set({ channelSpeeds, channelLikes });
+  await chrome.storage.local.set({ channelSpeeds, channelVolumes, channelLikes });
 
   activeChannelBadge.innerText = chrome.i18n.getMessage('badgeSaved');
   activeChannelBadge.className = 'badge badge-saved';
 
   applySpeedToActiveTab(speedVal);
+  applyVolumeToActiveTab(volumeVal);
+  chrome.runtime.sendMessage({ type: 'CHANNEL_STATUS_CHANGED' }).catch(() => {});
   await renderSavedChannelsList();
 }
 
@@ -288,14 +358,16 @@ async function resetActiveChannelRules() {
   if (!activeChannel) return;
 
   const handle = activeChannel.handle;
-  const storage = await chrome.storage.local.get(['channelSpeeds', 'channelLikes', 'defaultSpeed', 'defaultAutoLike']);
+  const storage = await chrome.storage.local.get(['channelSpeeds', 'channelVolumes', 'channelLikes', 'defaultSpeed', 'defaultVolume', 'defaultAutoLike']);
   const channelSpeeds = storage.channelSpeeds || {};
+  const channelVolumes = storage.channelVolumes || {};
   const channelLikes = storage.channelLikes || {};
 
   delete channelSpeeds[handle];
+  delete channelVolumes[handle];
   delete channelLikes[handle];
 
-  await chrome.storage.local.set({ channelSpeeds, channelLikes });
+  await chrome.storage.local.set({ channelSpeeds, channelVolumes, channelLikes });
 
   activeChannelBadge.innerText = chrome.i18n.getMessage('badgeActive');
   activeChannelBadge.className = 'badge badge-active';
@@ -306,6 +378,12 @@ async function resetActiveChannelRules() {
   updateSpeedDisplay(defaultSpeed);
   applySpeedToActiveTab(defaultSpeed);
 
+  // Apply default volume
+  const defaultVolume = storage.defaultVolume !== undefined ? parseInt(storage.defaultVolume) : 100;
+  volumeSlider.value = defaultVolume;
+  updateVolumeDisplay(defaultVolume);
+  applyVolumeToActiveTab(defaultVolume);
+
   // Apply default auto-like
   const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
   autoLikeToggle.checked = !!defaultAutoLike.enabled;
@@ -315,16 +393,18 @@ async function resetActiveChannelRules() {
   likeValueSlider.value = defaultAutoLike.value || 30;
   updateThresholdDisplay(likeValueSlider.value, likeModeSelect.value, likeValueLabel);
 
+  chrome.runtime.sendMessage({ type: 'CHANNEL_STATUS_CHANGED' }).catch(() => {});
   await renderSavedChannelsList();
 }
 
 async function renderSavedChannelsList() {
-  const storage = await chrome.storage.local.get(['channelSpeeds', 'channelLikes']);
+  const storage = await chrome.storage.local.get(['channelSpeeds', 'channelVolumes', 'channelLikes']);
   const channelSpeeds = storage.channelSpeeds || {};
+  const channelVolumes = storage.channelVolumes || {};
   const channelLikes = storage.channelLikes || {};
 
   // Combine unique handles
-  const handles = Array.from(new Set([...Object.keys(channelSpeeds), ...Object.keys(channelLikes)]));
+  const handles = Array.from(new Set([...Object.keys(channelSpeeds), ...Object.keys(channelVolumes), ...Object.keys(channelLikes)]));
   savedCountBadge.innerText = handles.length;
 
   savedChannelsList.innerHTML = '';
@@ -336,6 +416,7 @@ async function renderSavedChannelsList() {
 
   handles.forEach((handle) => {
     const speed = channelSpeeds[handle];
+    const volume = channelVolumes[handle];
     const likeConfig = channelLikes[handle];
 
     const item = document.createElement('div');
@@ -344,6 +425,9 @@ async function renderSavedChannelsList() {
     let badgesHtml = '';
     if (speed !== undefined) {
       badgesHtml += `<span class="pill-badge">${parseFloat(speed).toFixed(2)}x</span>`;
+    }
+    if (volume !== undefined) {
+      badgesHtml += `<span class="pill-badge pill-badge-vol">🔊 ${volume}%</span>`;
     }
     if (likeConfig && likeConfig.enabled) {
       const unit = likeConfig.mode === 'percent' ? '%' : 's';
@@ -365,12 +449,14 @@ async function renderSavedChannelsList() {
 
     item.querySelector('.btn-delete-item').addEventListener('click', async () => {
       delete channelSpeeds[handle];
+      delete channelVolumes[handle];
       delete channelLikes[handle];
-      await chrome.storage.local.set({ channelSpeeds, channelLikes });
+      await chrome.storage.local.set({ channelSpeeds, channelVolumes, channelLikes });
 
       if (activeChannel && activeChannel.handle === handle) {
         await refreshActiveTabInfo();
       }
+      chrome.runtime.sendMessage({ type: 'CHANNEL_STATUS_CHANGED' }).catch(() => {});
       await renderSavedChannelsList();
     });
 

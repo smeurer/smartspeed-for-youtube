@@ -1,13 +1,14 @@
-# SmartTube: Speed & Auto-Like for YouTube
+# SmartTube: Speed, Volume & Auto-Like for YouTube
 
-A modern browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google Chrome, Brave, Edge) that automatically manages custom video playback speeds and intelligent auto-liking per YouTube channel.
+A modern browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google Chrome, Brave, Edge) that automatically manages custom video playback speeds, volume levels, and intelligent auto-liking per YouTube channel.
 
 ## Key Features
 
 - **Channel-based Playback Speeds**: Automatically set custom speeds per YouTube channel (e.g., `1.3x` for podcasts/talks, `1.0x` for music videos).
+- **Channel-based Volume Levels**: Automatically set custom volume levels (0% – 100%) per YouTube channel (e.g. quieter for loud channels, louder for quiet creators).
 - **Automated Intelligent Auto-Like**: Automatically like videos from selected channels after reaching a custom duration/percentage threshold (e.g. after watching 30% of the video or 60 seconds).
-- **Safety & Duplication Protection**: Safely inspects YouTube's DOM (`aria-pressed`) to prevent unliking already liked videos or double-clicking on rewind/seeking.
-- **Manifest V3 Compliant**: Built natively for modern Chromium extension standards.
+- **Live Icon Status Badge & Tooltip**: Displays an active status badge (e.g. `1.5x`) on the extension icon when custom channel rules are active, and provides a detailed hover tooltip summarizing current channel, speed, volume, and auto-like settings.
+- **Manifest V3 Compliant**: Built natively for modern Chromium extension standards with a background service worker.
 - **Clean Popup UI**: Configure global defaults and channel-specific rules directly from the extension popup.
 - **Robust SPA Navigation Handling**: Seamlessly detects video and channel changes on YouTube without requiring full page reloads.
 - **Internationalized (i18n)**: Fully localized in English (`en`) and German (`de`), automatically adjusting to your browser's language setting.

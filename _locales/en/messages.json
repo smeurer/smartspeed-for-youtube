@@ -4,8 +4,16 @@
     "description": "The name of the extension."
   },
   "extDescription": {
-    "message": "Custom playback speeds & intelligent auto-liking per YouTube channel.",
+    "message": "Custom playback speeds, volume & intelligent auto-liking per YouTube channel.",
     "description": "The description of the extension."
+  },
+  "volumeLabel": {
+    "message": "Playback Volume",
+    "description": "Label for the volume display."
+  },
+  "defaultVolumeLabel": {
+    "message": "Default Volume",
+    "description": "Label for global default volume."
   },
   "currentChannel": {
     "message": "Current Channel",
@@ -82,5 +90,9 @@
   "deleteItemTitle": {
     "message": "Delete",
     "description": "Tooltip title for deleting a saved channel."
+  },
+  "disabledTooltip": {
+    "message": "SmartTube: Active on YouTube only",
+    "description": "Tooltip when the extension icon is inactive (non-YouTube page)."
   }
 }

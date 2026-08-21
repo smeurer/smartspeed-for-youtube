@@ -1,0 +1,11 @@
+{
+  "tasteLearning": true,
+  "permissions": {
+    "allow": [
+      "Shell(node generate_icons.js)",
+      "Shell(node scripts/check_i18n.js)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
