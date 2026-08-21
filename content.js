@@ -1,10 +1,13 @@
-// SmartSpeed for YouTube - Content Script
+// SmartTube: Speed & Auto-Like for YouTube - Content Script
 
 let currentChannelInfo = null;
 let targetSpeed = 1.0;
 let isSettingSpeed = false;
 let lastUrl = location.href;
 let retryTimer = null;
+
+// Track auto-liked video IDs in current session to prevent repeated triggers
+let lastLikedVideoId = null;
 
 // 1. Channel Detection Logic
 function getYouTubeChannelInfo() {
@@ -66,6 +69,13 @@ function getYouTubeChannelInfo() {
   };
 }
 
+// Extract active video ID from URL
+function getCurrentVideoId() {
+  if (!window.location.pathname.startsWith('/watch')) return null;
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('v');
+}
+
 // 2. Playback Speed Application
 async function updatePlaybackSpeed() {
   const channelInfo = getYouTubeChannelInfo();
@@ -98,7 +108,97 @@ function applySpeedToVideo(speed) {
   }
 }
 
-// 3. Retry loop when navigating or when channel info is pending DOM render
+// 3. Auto-Like Logic
+function findYouTubeLikeButton() {
+  // Try modern YouTube segmented like button first
+  const segmentedLikeBtn = document.querySelector('like-button-view-model button') ||
+                           document.querySelector('#top-level-buttons-computed segmented-like-dislike-button-view-model button');
+  if (segmentedLikeBtn) return segmentedLikeBtn;
+
+  // Fallbacks for YouTube variants / mobile / older layouts
+  const genericLikeBtn = document.querySelector('ytd-toggle-button-renderer #button[aria-label*="like" i]') ||
+                         document.querySelector('button[aria-label*="like" i]') ||
+                         document.querySelector('button[title*="like" i]');
+  return genericLikeBtn;
+}
+
+function isVideoAlreadyLiked(likeButton) {
+  if (!likeButton) return false;
+
+  const ariaPressed = likeButton.getAttribute('aria-pressed');
+  if (ariaPressed === 'true') return true;
+
+  // Check child element with aria-pressed
+  const pressedChild = likeButton.querySelector('[aria-pressed="true"]');
+  if (pressedChild) return true;
+
+  // Check parent container state
+  const parentSegmented = likeButton.closest('segmented-like-dislike-button-view-model');
+  if (parentSegmented && parentSegmented.querySelector('like-button-view-model [aria-pressed="true"]')) {
+    return true;
+  }
+
+  return false;
+}
+
+async function checkAndApplyAutoLike() {
+  const videoId = getCurrentVideoId();
+  if (!videoId || lastLikedVideoId === videoId) return;
+
+  const channelInfo = getYouTubeChannelInfo() || currentChannelInfo;
+  if (!channelInfo) return;
+
+  const video = document.querySelector('video');
+  if (!video || !video.duration || isNaN(video.duration) || video.duration <= 0) return;
+
+  const storage = await chrome.storage.local.get(['channelLikes', 'defaultAutoLike']);
+  const channelLikes = storage.channelLikes || {};
+  const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
+
+  let likeConfig = null;
+  if (channelLikes[channelInfo.handle] !== undefined) {
+    likeConfig = channelLikes[channelInfo.handle];
+  } else if (channelInfo.channelId && channelLikes[channelInfo.channelId] !== undefined) {
+    likeConfig = channelLikes[channelInfo.channelId];
+  } else {
+    likeConfig = defaultAutoLike;
+  }
+
+  if (!likeConfig || !likeConfig.enabled) return;
+
+  const mode = likeConfig.mode || 'percent';
+  const targetValue = parseFloat(likeConfig.value) || 30;
+
+  let isThresholdMet = false;
+  if (mode === 'percent') {
+    const currentPercent = (video.currentTime / video.duration) * 100;
+    isThresholdMet = currentPercent >= targetValue;
+  } else if (mode === 'seconds') {
+    isThresholdMet = video.currentTime >= targetValue;
+  }
+
+  if (!isThresholdMet) return;
+
+  const likeButton = findYouTubeLikeButton();
+  if (!likeButton) return;
+
+  if (isVideoAlreadyLiked(likeButton)) {
+    // Already liked, mark video as handled
+    lastLikedVideoId = videoId;
+    return;
+  }
+
+  // Execute Auto-Like click
+  try {
+    likeButton.click();
+    lastLikedVideoId = videoId;
+    console.log(`[SmartTube] Auto-Liked video ${videoId} for channel ${channelInfo.handle} at ${Math.round(video.currentTime)}s (${mode}: ${targetValue})`);
+  } catch (err) {
+    console.error('[SmartTube] Failed to click like button:', err);
+  }
+}
+
+// 4. Retry loop when navigating or when channel info is pending DOM render
 function startRetryLoop() {
   if (retryTimer) clearInterval(retryTimer);
 
@@ -114,12 +214,20 @@ function startRetryLoop() {
 }
 
 function handleNavigation() {
+  const newVideoId = getCurrentVideoId();
+  if (newVideoId !== lastLikedVideoId) {
+    // Reset like lock if video changed
+    if (!location.href.includes(lastLikedVideoId)) {
+      lastLikedVideoId = null;
+    }
+  }
+
   currentChannelInfo = null;
   updatePlaybackSpeed();
   startRetryLoop();
 }
 
-// 4. Robust SPA Navigation & DOM Observers
+// 5. Robust SPA Navigation & DOM Observers
 function initAutoSpeedController() {
   // Initial run
   handleNavigation();
@@ -167,6 +275,12 @@ function initAutoSpeedController() {
     }
   }, true);
 
+  document.addEventListener('timeupdate', (e) => {
+    if (e.target && e.target.tagName === 'VIDEO') {
+      checkAndApplyAutoLike();
+    }
+  }, true);
+
   document.addEventListener('ratechange', (e) => {
     if (e.target && e.target.tagName === 'VIDEO' && !isSettingSpeed) {
       // Re-enforce target speed if YouTube player resets it externally
@@ -177,24 +291,37 @@ function initAutoSpeedController() {
   }, true);
 }
 
-// 5. Messaging interface for Extension Popup
+// 6. Messaging interface for Extension Popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'GET_CURRENT_INFO') {
     const channelInfo = getYouTubeChannelInfo() || currentChannelInfo;
-    chrome.storage.local.get(['channelSpeeds', 'defaultSpeed'], (storage) => {
+    chrome.storage.local.get(['channelSpeeds', 'defaultSpeed', 'channelLikes', 'defaultAutoLike'], (storage) => {
       const channelSpeeds = storage.channelSpeeds || {};
       const defaultSpeed = parseFloat(storage.defaultSpeed) || 1.0;
-      
+      const channelLikes = storage.channelLikes || {};
+      const defaultAutoLike = storage.defaultAutoLike || { enabled: false, mode: 'percent', value: 30 };
+
       let speed = defaultSpeed;
-      let isCustom = false;
+      let isCustomSpeed = false;
+
+      let likeConfig = defaultAutoLike;
+      let isCustomLike = false;
 
       if (channelInfo) {
         if (channelSpeeds[channelInfo.handle] !== undefined) {
           speed = parseFloat(channelSpeeds[channelInfo.handle]);
-          isCustom = true;
+          isCustomSpeed = true;
         } else if (channelInfo.channelId && channelSpeeds[channelInfo.channelId] !== undefined) {
           speed = parseFloat(channelSpeeds[channelInfo.channelId]);
-          isCustom = true;
+          isCustomSpeed = true;
+        }
+
+        if (channelLikes[channelInfo.handle] !== undefined) {
+          likeConfig = channelLikes[channelInfo.handle];
+          isCustomLike = true;
+        } else if (channelInfo.channelId && channelLikes[channelInfo.channelId] !== undefined) {
+          likeConfig = channelLikes[channelInfo.channelId];
+          isCustomLike = true;
         }
       }
 
@@ -203,7 +330,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         channelInfo: channelInfo,
         speed: speed,
         defaultSpeed: defaultSpeed,
-        isCustom: isCustom
+        isCustomSpeed: isCustomSpeed,
+        likeConfig: likeConfig,
+        defaultAutoLike: defaultAutoLike,
+        isCustomLike: isCustomLike,
+        isCustom: isCustomSpeed || isCustomLike
       });
     });
     return true; // Keep sendResponse async channel open

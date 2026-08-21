@@ -1,12 +1,14 @@
-# SmartSpeed for YouTube
+# SmartTube: Speed & Auto-Like for YouTube
 
-A browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google Chrome, Brave, Edge) that automatically saves and applies custom video playback speeds per YouTube channel.
+A modern browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google Chrome, Brave, Edge) that automatically manages custom video playback speeds and intelligent auto-liking per YouTube channel.
 
 ## Key Features
 
 - **Channel-based Playback Speeds**: Automatically set custom speeds per YouTube channel (e.g., `1.3x` for podcasts/talks, `1.0x` for music videos).
+- **Automated Intelligent Auto-Like**: Automatically like videos from selected channels after reaching a custom duration/percentage threshold (e.g. after watching 30% of the video or 60 seconds).
+- **Safety & Duplication Protection**: Safely inspects YouTube's DOM (`aria-pressed`) to prevent unliking already liked videos or double-clicking on rewind/seeking.
 - **Manifest V3 Compliant**: Built natively for modern Chromium extension standards.
-- **Clean Popup UI**: Manage default and channel-specific speeds directly from the extension popup without intrusive UI overlays injected into YouTube's webpage.
+- **Clean Popup UI**: Configure global defaults and channel-specific rules directly from the extension popup.
 - **Robust SPA Navigation Handling**: Seamlessly detects video and channel changes on YouTube without requiring full page reloads.
 - **Internationalized (i18n)**: Fully localized in English (`en`) and German (`de`), automatically adjusting to your browser's language setting.
 
@@ -16,7 +18,7 @@ A browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google C
 
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/<your-username>/smartspeed-for-youtube.git
+   git clone https://github.com/<your-username>/smarttube-speed-and-autolike.git
    ```
 2. Open your browser's extension management page:
    - **Vivaldi**: `vivaldi://extensions`
@@ -29,9 +31,10 @@ A browser extension (Manifest V3) for Chromium-based browsers (Vivaldi, Google C
 ## Usage
 
 1. Navigate to any YouTube video (e.g., `youtube.com/watch?v=...`).
-2. Click the **SmartSpeed** extension icon in your browser toolbar.
-3. Choose your target playback speed (e.g., `1.3x`) and click **Save Channel Speed**.
-4. Future videos from this channel will automatically play at your chosen speed!
+2. Click the **SmartTube** extension icon in your browser toolbar.
+3. Configure your desired playback speed and/or Auto-Like trigger rules for the channel.
+4. Click **Save Channel Rules**.
+5. Future videos from this channel will automatically apply your speed and auto-like settings!
 
 ---
 
@@ -46,4 +49,3 @@ or
 ```bash
 node scripts/check_i18n.js
 ```
-

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartSpeed for YouTube</title>
+  <title>SmartTube: Speed & Auto-Like</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -12,12 +12,11 @@
     <header class="header">
       <div class="logo">
         <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"></polygon>
-          <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line>
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path>
         </svg>
-        <span class="logo-title">SmartSpeed</span>
+        <span class="logo-title">SmartTube</span>
       </div>
-      <span class="version-badge">v1.0</span>
+      <span class="version-badge">v1.1</span>
     </header>
 
     <!-- Active Channel Section -->
@@ -40,58 +39,104 @@
         </div>
       </div>
 
-      <div class="speed-controls" id="speed-controls-group">
-        <div class="speed-value-display">
-          <span class="label" data-i18n="speedLabel">Geschwindigkeit</span>
-          <span id="current-speed-label" class="speed-number">1.0x</span>
+      <div class="controls-group" id="controls-group">
+        <!-- Speed Controls -->
+        <div class="feature-block">
+          <div class="feature-header">
+            <span class="feature-title" data-i18n="speedLabel">Wiedergabegeschwindigkeit</span>
+            <span id="current-speed-label" class="feature-value">1.0x</span>
+          </div>
+
+          <div class="slider-container">
+            <input type="range" id="speed-slider" min="0.5" max="3.0" step="0.05" value="1.0">
+          </div>
+
+          <div class="preset-buttons">
+            <button class="btn-preset" data-speed="1.0">1.0x</button>
+            <button class="btn-preset" data-speed="1.25">1.25x</button>
+            <button class="btn-preset" data-speed="1.3">1.3x</button>
+            <button class="btn-preset" data-speed="1.5">1.5x</button>
+            <button class="btn-preset" data-speed="1.75">1.75x</button>
+            <button class="btn-preset" data-speed="2.0">2.0x</button>
+          </div>
         </div>
 
-        <!-- Slider -->
-        <div class="slider-container">
-          <input type="range" id="speed-slider" min="0.5" max="3.0" step="0.05" value="1.0">
-        </div>
+        <div class="divider"></div>
 
-        <!-- Speed Presets -->
-        <div class="preset-buttons">
-          <button class="btn-preset" data-speed="1.0">1.0x</button>
-          <button class="btn-preset" data-speed="1.25">1.25x</button>
-          <button class="btn-preset" data-speed="1.3">1.3x</button>
-          <button class="btn-preset" data-speed="1.5">1.5x</button>
-          <button class="btn-preset" data-speed="1.75">1.75x</button>
-          <button class="btn-preset" data-speed="2.0">2.0x</button>
+        <!-- Auto-Like Controls -->
+        <div class="feature-block">
+          <div class="feature-header">
+            <span class="feature-title" data-i18n="autoLikeLabel">Auto-Like für Video</span>
+            <label class="switch">
+              <input type="checkbox" id="auto-like-toggle">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div id="like-threshold-group" class="threshold-group disabled">
+            <div class="threshold-row">
+              <span class="sub-label" data-i18n="thresholdLabel">Auslöser (Threshold)</span>
+              <select id="like-mode-select" class="mode-select">
+                <option value="percent" data-i18n="thresholdPercent">Fortschritt (%)</option>
+                <option value="seconds" data-i18n="thresholdSeconds">Zeit (Sekunden)</option>
+              </select>
+            </div>
+            <div class="threshold-slider-row">
+              <input type="range" id="like-value-slider" min="5" max="90" step="5" value="30">
+              <span id="like-value-label" class="threshold-value-display">30%</span>
+            </div>
+          </div>
         </div>
 
         <div class="action-buttons">
           <button id="btn-save-channel" class="btn btn-primary" disabled data-i18n="btnSaveChannel">
-            Kanal-Speed Speichern
+            Kanal-Regeln Speichern
           </button>
           <button id="btn-reset-channel" class="btn btn-secondary" disabled data-i18n="btnResetChannel">
-            Zurücksetzen
+            Kanal-Regeln Zurücksetzen
           </button>
         </div>
       </div>
     </section>
 
-    <!-- Global Default Speed Section -->
-    <section class="card default-speed-card">
+    <!-- Global Default Settings Section -->
+    <section class="card default-settings-card">
       <div class="card-header-compact">
-        <span class="card-subtitle" data-i18n="defaultSpeedTitle">Standard für unkonfigurierte Kanäle</span>
+        <span class="card-subtitle" data-i18n="defaultSettingsTitle">Globale Standards (Unkonfigurierte Kanäle)</span>
+      </div>
+
+      <div class="default-row">
+        <span class="sub-label" data-i18n="defaultSpeedLabel">Standard-Geschwindigkeit</span>
         <span id="default-speed-value" class="speed-pill">1.0x</span>
       </div>
-      <div class="default-speed-row">
+      <div class="default-slider-row">
         <input type="range" id="default-speed-slider" min="0.5" max="3.0" step="0.05" value="1.0">
+      </div>
+
+      <div class="divider-compact"></div>
+
+      <div class="default-row">
+        <span class="sub-label" data-i18n="defaultAutoLikeLabel">Standard Auto-Like</span>
+        <label class="switch switch-small">
+          <input type="checkbox" id="default-like-toggle">
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+      <div id="default-like-threshold-group" class="threshold-slider-row disabled">
+        <input type="range" id="default-like-slider" min="5" max="90" step="5" value="30">
+        <span id="default-like-label" class="threshold-value-display">30%</span>
       </div>
     </section>
 
     <!-- Saved Channels List -->
     <section class="card saved-channels-card">
       <div class="card-header">
-        <span class="card-subtitle" data-i18n="savedChannelsTitle">Gespeicherte Kanäle</span>
+        <span class="card-subtitle" data-i18n="savedChannelsTitle">Gespeicherte Kanal-Regeln</span>
         <span id="saved-count-badge" class="count-badge">0</span>
       </div>
 
       <div id="saved-channels-list" class="saved-channels-list">
-        <div class="empty-state" data-i18n="emptySavedChannels">Noch keine Kanäle gespeichert.</div>
+        <div class="empty-state" data-i18n="emptySavedChannels">Noch keine Kanal-Regeln gespeichert.</div>
       </div>
     </section>
   </div>

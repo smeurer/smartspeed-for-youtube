@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "SmartSpeed for YouTube",
+    "message": "SmartTube: Speed & Auto-Like",
     "description": "Der Name der Extension."
   },
   "extDescription": {
-    "message": "Speichert und stellt automatisch individuelle Wiedergabegeschwindigkeiten pro YouTube-Kanal ein.",
+    "message": "Eigene Wiedergabegeschwindigkeit & intelligentes Auto-Like pro YouTube-Kanal.",
     "description": "Die Beschreibung der Extension."
   },
   "currentChannel": {
@@ -17,11 +17,11 @@
   },
   "badgeActive": {
     "message": "Aktiv",
-    "description": "Badge wenn der aktuelle Kanal mit Standardgeschwindigkeit läuft."
+    "description": "Badge wenn der aktuelle Kanal mit Standardeinstellungen läuft."
   },
   "badgeSaved": {
     "message": "Gespeichert",
-    "description": "Badge wenn für den aktuellen Kanal eine eigene Geschwindigkeit gespeichert ist."
+    "description": "Badge wenn für den aktuellen Kanal eigene Regeln gespeichert sind."
   },
   "noVideoLoaded": {
     "message": "Kein YouTube Video geladen",
@@ -32,27 +32,51 @@
     "description": "Hinweistext für den aktiven Tab."
   },
   "speedLabel": {
-    "message": "Geschwindigkeit",
+    "message": "Wiedergabegeschwindigkeit",
     "description": "Beschriftung der Geschwindigkeitsanzeige."
   },
+  "autoLikeLabel": {
+    "message": "Auto-Like für Video",
+    "description": "Beschriftung für Auto-Like-Funktion."
+  },
+  "thresholdLabel": {
+    "message": "Auslöser (Threshold)",
+    "description": "Beschriftung für den Auslöser-Schwellenwert."
+  },
+  "thresholdPercent": {
+    "message": "Fortschritt (%)",
+    "description": "Option für prozentualen Auslöser."
+  },
+  "thresholdSeconds": {
+    "message": "Zeit (Sekunden)",
+    "description": "Option für sekundenbasierten Auslöser."
+  },
   "btnSaveChannel": {
-    "message": "Kanal-Speed Speichern",
-    "description": "Button zum Speichern der Geschwindigkeit für den Kanal."
+    "message": "Kanal-Regeln Speichern",
+    "description": "Button zum Speichern der Regeln für den Kanal."
   },
   "btnResetChannel": {
-    "message": "Zurücksetzen",
-    "description": "Button zum Zurücksetzen der Kanal-Geschwindigkeit auf Standard."
+    "message": "Kanal-Regeln Zurücksetzen",
+    "description": "Button zum Zurücksetzen der Kanal-Regeln auf Standard."
   },
-  "defaultSpeedTitle": {
-    "message": "Standard für unkonfigurierte Kanäle",
-    "description": "Bereichsüberschrift für die globale Standardgeschwindigkeit."
+  "defaultSettingsTitle": {
+    "message": "Globale Standards (Unkonfigurierte Kanäle)",
+    "description": "Bereichsüberschrift für die globalen Standardeinstellungen."
+  },
+  "defaultSpeedLabel": {
+    "message": "Standard-Geschwindigkeit",
+    "description": "Beschriftung für Standard-Geschwindigkeit."
+  },
+  "defaultAutoLikeLabel": {
+    "message": "Standard Auto-Like",
+    "description": "Beschriftung für Standard Auto-Like."
   },
   "savedChannelsTitle": {
-    "message": "Gespeicherte Kanäle",
+    "message": "Gespeicherte Kanal-Regeln",
     "description": "Bereichsüberschrift für die Liste gespeicherter Kanäle."
   },
   "emptySavedChannels": {
-    "message": "Noch keine Kanäle gespeichert.",
+    "message": "Noch keine Kanal-Regeln gespeichert.",
     "description": "Hinweis wenn keine gespeicherten Kanäle vorhanden sind."
   },
   "deleteItemTitle": {
